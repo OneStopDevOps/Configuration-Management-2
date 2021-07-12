@@ -1,0 +1,9 @@
+# Vars file with common variables shared between each role.
+http_host: "mywordpress.com"
+http_conf: "wordpress-local.conf"
+http_port: "80"
+
+db_name: wordpress
+db_user: user
+db_password: password
+db_root_password: password

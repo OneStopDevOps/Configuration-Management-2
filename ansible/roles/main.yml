@@ -1,0 +1,11 @@
+# Ansible playbook for installing WordPress on Ubuntu.
+---
+- hosts: client_node
+  become: true
+  remote_user: ubuntu
+  roles:
+    - common
+    - apache
+    - php
+    - mysql
+    - wordpress
