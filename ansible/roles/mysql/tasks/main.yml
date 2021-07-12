@@ -1,0 +1,77 @@
+# MySQL Configuration
+
+---
+- name: Install MySQL
+  apt:
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  with_items:
+    - mysql-server
+    - python3-pymysql
+  tags: [system]
+
+- name: Start MySQL service
+  service:
+    name: mysql
+    state: started
+  register: mysql_status
+
+- name: Print MySQL status
+  debug:
+    var: mysql_status
+
+- name: Create MySQL root password
+  mysql_user:
+    name: root
+    password: "{{ db_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags: [mysql]
+
+- name: Remove anonymous users in the database
+  mysql_user:
+    name: ''
+    host: "{{ item }}"
+    state: absent
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+  tags: [mysql]
+
+- name: Remove test database
+  mysql_db:
+    name: "{{ db_name }}"
+    state: absent
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  tags: [mysql]
+
+- name: Create a database for wordpress
+  mysql_db:
+    name: "{{ db_name }}"
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    state: present
+  tags: [mysql]
+
+- name: Create user for wordpress
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    host: "%"
+    priv: "{{ db_name }}.*:ALL,GRANT"
+    login_user: root
+    login_password: "{{ db_root_password}}"
+    state: present
+  tags: [mysql]
+
+# UFW Configuration
+- name: Allows HTTP connection on port {{ http_port }}
+  ufw:
+    rule: allow
+    port: "{{ http_port }}"
+    proto: tcp
+  tags: [system]
